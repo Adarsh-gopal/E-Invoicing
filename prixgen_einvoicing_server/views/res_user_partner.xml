@@ -1,0 +1,44 @@
+<odoo>
+  <data>
+    
+    <record model="ir.ui.view" id="einvoicing_view_users_form">
+      <field name="name">eInvoicing view users form</field>
+      <field name="model">res.users</field>
+      <field name="inherit_id" ref="base.view_users_form"/>
+      <field name="arch" type="xml">
+        <page name="references" position="after">
+          <page name="einv" string="eInvoicing Settings">
+            <group>
+              <group>
+                <field name="einv_user"/>
+                <field name="einv_pass"/>
+                <field name="einv_client_id"/>
+                <field name="einv_client_secret"/>
+                <field name="einv_sub_key"/>
+              </group>
+            </group>
+          </page>
+        </page>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="einvoicing_view_partner_form">
+      <field name="name">eInvoicing view partner form</field>
+      <field name="model">res.partner</field>
+      <field name="inherit_id" ref="base.view_partner_form"/>
+      <field name="arch" type="xml">
+        <page name="internal_notes" position="after">
+          <page name="einv" string="eInvoicing Settings">
+            <group>
+              <group>
+                <field name="einv_txn_key"/>
+                <field name="einv_session_id"/>
+              </group>
+            </group>
+          </page>
+        </page>
+      </field>
+    </record>
+  
+  </data>
+</odoo>
