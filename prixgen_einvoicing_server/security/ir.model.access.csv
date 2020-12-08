@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_einvoicing_session_manager_internal,einvoicing_session_manager_internal,model_einvoicing_session_manager,base.group_user,1,1,1,1
+access_einvoicing_transaction_manager_internal,einvoicing_transaction_manager_internal,model_einvoicing_transaction_manager,base.group_user,1,1,1,1

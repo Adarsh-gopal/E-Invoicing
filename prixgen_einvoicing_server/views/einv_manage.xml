@@ -1,0 +1,99 @@
+<odoo>
+  <data>
+
+    <record model="ir.ui.view" id="einvoicing_session_list_view">
+      <field name="name">eInvoicing Session List</field>
+      <field name="model">einvoicing.session.manager</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="user_id"/>
+          <field name="partner_ids" widget="many2many_tags"/>
+          <field name="app_key"/>
+          <field name="token_expiry"/>
+          <field name="auth_token"/>
+          <field name="sek"/>
+          <field name="session_expiry"/>
+        </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="einvoicing_session_form_view">
+      <field name="name">eInvoicing Session Form</field>
+      <field name="model">einvoicing.session.manager</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <group>
+                <field name="user_id"/>
+                <field name="partner_ids" widget="many2many_tags"/>
+                <field name="app_key"/>
+                <field name="token_expiry"/>
+                <field name="auth_token"/>
+                <field name="sek"/>
+                <field name="session_expiry"/>
+                <button name="generate_new_keys" type="object" string="Generate Keys"/>
+              </group>
+            </group>
+          </sheet>
+          <sheet>
+            <h3>Subscritption Details</h3>
+            <field name="subscription_details"/>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="einvoicing_session_action">
+      <field name="name">eInvoicing Sessions</field>
+      <field name="res_model">einvoicing.session.manager</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="eInvoicing Sessions Menu" id="einvoicing_sessions_menu" action="einvoicing_session_action"/>
+
+
+    <record model="ir.ui.view" id="einvoicing_transaction_list_view">
+      <field name="name">eInvoicing Transaction List</field>
+      <field name="model">einvoicing.transaction.manager</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="user_id"/>
+          <field name="session_id"/>
+          <field name="partner_id"/>
+        </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="einvoicing_transaction_form_view">
+      <field name="name">eInvoicing Transaction Form</field>
+      <field name="model">einvoicing.transaction.manager</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <group>
+                <field name="user_id"/>
+                <field name="session_id"/>
+                <field name="partner_id"/>
+              </group>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="einvoicing_transaction_action">
+      <field name="name">eInvoicing Transactions</field>
+      <field name="res_model">einvoicing.transaction.manager</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+      name="eInvoicing Transactions Menu"
+      id="einvoicing_transactions_menu"
+      action="einvoicing_transaction_action"
+      parent="einvoicing_sessions_menu"/>
+
+  </data>
+</odoo>
