@@ -48,8 +48,7 @@ class EinvoicingSessionManager(models.Model):
         encrypted_pass = b64encode(pub_key_encryption.encrypt(bytes(self.user_id.einv_pass, 'utf-8')))
 
         headers = {
-            "client_id" : self.user_id.einv_client_id,
-            "client_secret" : self.user_id.einv_client_secret
+            "X-CT-Auth-Token": "d07aa469-541c-449f-8d7e-629074ab5d64"
         }
 
         payload ={
@@ -61,7 +60,7 @@ class EinvoicingSessionManager(models.Model):
             }
         }
 
-        url = "https://einv-apisandbox.nic.in/eivital/v1.03/auth"
+        url = "https://einv-gsp-sandbox.internal.cleartax.co/vital/v1.03/auth"
 
         response = requests.post(url, headers=headers, json=payload)
         response_json = False
@@ -135,8 +134,7 @@ class EinvoicingTransactionManager(models.Model):
         self.session_id = self.env['einvoicing.session.manager'].search([('user_id','=',self.user_id.id)])
         self.partner_id = self.env['res.partner'].sudo().search([('einv_txn_key','=',auth.get('txn_key'))])
         return {
-            "client_id": self.user_id.einv_client_id,
-            "client_secret": self.user_id.einv_client_secret,
+            "X-CT-Auth-Token": "d07aa469-541c-449f-8d7e-629074ab5d64",
             "user_name": self.user_id.einv_user,
             "Gstin": self.partner_id.vat
         }
@@ -146,7 +144,7 @@ class EinvoicingTransactionManager(models.Model):
         cypher = AES.new(b64decode(self.session_id.sek), AES.MODE_ECB)
         payload = {"Data":b64encode(cypher.encrypt(pad(bytes(json.dumps(data),'utf-8'),16))).decode('utf-8')}
 
-        url = "https://einv-apisandbox.nic.in/eicore/v1.03/Invoice"
+        url = "https://einv-gsp-sandbox.internal.cleartax.co/core/v1.03/Invoice"
         response = requests.post(url, headers=header, json=payload)
         response_code = response.status_code
         if response_code == 200:
