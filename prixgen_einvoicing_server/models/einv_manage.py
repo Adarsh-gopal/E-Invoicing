@@ -16,8 +16,7 @@ class EinvoicingSessionManager(models.Model):
     _name = 'einvoicing.session.manager'
     _description = 'eInvoicing Session Manager'
 
-    user_id = fields.Many2one('res.users')
-    partner_ids = fields.One2many('res.partner','einv_session_id')
+    partner_id = fields.Many2one('res.partner')
     app_key = fields.Binary()
     token_expiry = fields.Datetime()
     auth_token = fields.Char()
@@ -27,9 +26,7 @@ class EinvoicingSessionManager(models.Model):
     subscription_details = fields.Text()
 
     def generate_new_keys(self):
-        self.user_id.einv_sub_key = b64encode(secrets.token_bytes(16)).decode('utf-8')
-        for partner in self.partner_ids:
-            partner.einv_txn_key = b64encode(secrets.token_bytes(16)).decode('utf-8')
+        self.partner_id.einv_txn_key = b64encode(secrets.token_bytes(16)).decode('utf-8')
 
     def _request_session(self,force_refresh):
         pub_key = RSA.importKey("""-----BEGIN PUBLIC KEY-----
@@ -45,7 +42,7 @@ class EinvoicingSessionManager(models.Model):
 
         self.app_key = b64encode(secrets.token_bytes(32))
         encrypted_key = b64encode(pub_key_encryption.encrypt(b64decode(self.app_key)))
-        encrypted_pass = b64encode(pub_key_encryption.encrypt(bytes(self.user_id.einv_pass, 'utf-8')))
+        encrypted_pass = b64encode(pub_key_encryption.encrypt(bytes(self.partner_id.einv_pass, 'utf-8')))
 
         headers = {
             "X-CT-Auth-Token": "d07aa469-541c-449f-8d7e-629074ab5d64"
@@ -53,7 +50,7 @@ class EinvoicingSessionManager(models.Model):
 
         payload ={
             "data": {
-                "UserName": self.user_id.einv_user,
+                "UserName": self.partner_id.einv_user,
                 "Password": encrypted_pass,
                 "AppKey": encrypted_key,
                 "ForceRefreshAccessToken": force_refresh
@@ -125,17 +122,15 @@ class EinvoicingTransactionManager(models.Model):
     _name = 'einvoicing.transaction.manager'
     _description = 'eInvoicing Transaction manager'
 
-    user_id = fields.Many2one('res.users')
     session_id = fields.Many2one('einvoicing.session.manager')
     partner_id = fields.Many2one('res.partner')
 
     def _get_session(self,auth):
-        self.user_id = self.env['res.users'].search([('einv_sub_key','=',auth.get('sub_key'))])
-        self.session_id = self.env['einvoicing.session.manager'].search([('user_id','=',self.user_id.id)])
         self.partner_id = self.env['res.partner'].sudo().search([('einv_txn_key','=',auth.get('txn_key'))])
+        self.session_id = self.env['einvoicing.session.manager'].search([('partner_id','=',self.partner_id.id)])
         return {
             "X-CT-Auth-Token": "d07aa469-541c-449f-8d7e-629074ab5d64",
-            "user_name": self.user_id.einv_user,
+            "user_name": self.partner_id.einv_user,
             "Gstin": self.partner_id.vat
         }
     

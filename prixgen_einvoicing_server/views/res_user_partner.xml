@@ -10,11 +10,7 @@
           <page name="einv" string="eInvoicing Settings">
             <group>
               <group>
-                <field name="einv_user"/>
-                <field name="einv_pass"/>
-                <field name="einv_client_id"/>
-                <field name="einv_client_secret"/>
-                <field name="einv_sub_key"/>
+                <field name="einv_partner_ids"/>
               </group>
             </group>
           </page>
@@ -31,8 +27,10 @@
           <page name="einv" string="eInvoicing Settings">
             <group>
               <group>
+                <field name="entity_user_id"/>
+                <field name="einv_user"/>
+                <field name="einv_pass"/>
                 <field name="einv_txn_key"/>
-                <field name="einv_session_id"/>
               </group>
             </group>
           </page>

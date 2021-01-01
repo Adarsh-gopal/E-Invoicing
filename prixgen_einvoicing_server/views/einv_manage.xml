@@ -6,8 +6,7 @@
       <field name="model">einvoicing.session.manager</field>
       <field name="arch" type="xml">
         <tree>
-          <field name="user_id"/>
-          <field name="partner_ids" widget="many2many_tags"/>
+          <field name="partner_id"/>
           <field name="app_key"/>
           <field name="token_expiry"/>
           <field name="auth_token"/>
@@ -25,8 +24,7 @@
           <sheet>
             <group>
               <group>
-                <field name="user_id"/>
-                <field name="partner_ids" widget="many2many_tags"/>
+                <field name="partner_id"/>
                 <field name="app_key"/>
                 <field name="token_expiry"/>
                 <field name="auth_token"/>
@@ -58,7 +56,6 @@
       <field name="model">einvoicing.transaction.manager</field>
       <field name="arch" type="xml">
         <tree>
-          <field name="user_id"/>
           <field name="session_id"/>
           <field name="partner_id"/>
         </tree>
@@ -73,7 +70,6 @@
           <sheet>
             <group>
               <group>
-                <field name="user_id"/>
                 <field name="session_id"/>
                 <field name="partner_id"/>
               </group>
