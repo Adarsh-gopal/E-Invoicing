@@ -58,6 +58,7 @@
         <tree>
           <field name="session_id"/>
           <field name="partner_id"/>
+          <field name="miss_count"/>
         </tree>
       </field>
     </record>
@@ -72,6 +73,7 @@
               <group>
                 <field name="session_id"/>
                 <field name="partner_id"/>
+                <field name="miss_count"/>
               </group>
             </group>
           </sheet>

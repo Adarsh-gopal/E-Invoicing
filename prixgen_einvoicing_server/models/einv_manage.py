@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import logging
 import secrets
 import requests
 from datetime import datetime
@@ -11,11 +12,14 @@ from Crypto.Util.Padding import pad,unpad
 
 from odoo import models, fields, api
 
+_logger = logging.getLogger(__name__)
+
 
 class EinvoicingSessionManager(models.Model):
     _name = 'einvoicing.session.manager'
     _description = 'eInvoicing Session Manager'
 
+    user_id = fields.Many2one('res.user',related='partner_id')
     partner_id = fields.Many2one('res.partner')
     app_key = fields.Binary()
     token_expiry = fields.Datetime()
@@ -45,7 +49,7 @@ class EinvoicingSessionManager(models.Model):
         encrypted_pass = b64encode(pub_key_encryption.encrypt(bytes(self.partner_id.einv_pass, 'utf-8')))
 
         headers = {
-            "X-CT-Auth-Token": "d07aa469-541c-449f-8d7e-629074ab5d64"
+            "X-CT-Auth-Token": "e23a24b1-1c3f-4a62-b11c-a1e4d6f5b3d6"
         }
 
         payload ={
@@ -65,7 +69,9 @@ class EinvoicingSessionManager(models.Model):
         if response_code == 200:
             response_json = response.json()
 
-        print('\n\nSession Response\n',response_json)
+        _logger.info('\nHeader\n{}\nHeader\n'.format(headers))
+        _logger.info('\nPayload\n{}\nPayload\n'.format(payload))
+        _logger.info('\nResponse\n{}\nResponse\n'.format(response_json))
         return response_json
         
     def _update_session(self,data):
@@ -124,12 +130,14 @@ class EinvoicingTransactionManager(models.Model):
 
     session_id = fields.Many2one('einvoicing.session.manager')
     partner_id = fields.Many2one('res.partner')
+    miss_count = fields.Integer()
 
     def _get_session(self,auth):
+        self.miss_count = auth.get('miscnt')
         self.partner_id = self.env['res.partner'].sudo().search([('einv_txn_key','=',auth.get('txn_key'))])
         self.session_id = self.env['einvoicing.session.manager'].search([('partner_id','=',self.partner_id.id)])
         return {
-            "X-CT-Auth-Token": "d07aa469-541c-449f-8d7e-629074ab5d64",
+            "X-CT-Auth-Token": "e23a24b1-1c3f-4a62-b11c-a1e4d6f5b3d6",
             "user_name": self.partner_id.einv_user,
             "Gstin": self.partner_id.vat
         }
@@ -176,6 +184,7 @@ class EinvoicingTransactionManager(models.Model):
                 'Error': 'Authentication Failed',
                 'GovResponse': {}
             }
+        
         if new_rec.session_id:
             session_resp = new_rec.session_id._auth_session()
             print('\n\nSession\n\n',new_rec.session_id)
@@ -189,5 +198,65 @@ class EinvoicingTransactionManager(models.Model):
                 'GovResponse': {}
             }
         transaction_resp = new_rec._process_irn_request(header,request_json.get('data'))
+        print('\n\nIRN Response\n',transaction_resp)
+        return transaction_resp
+    
+    
+    def _process_ewb_request(self,header,data):
+        header.update({"AuthToken": self.session_id.auth_token})
+        cypher = AES.new(b64decode(self.session_id.sek), AES.MODE_ECB)
+        payload = {"Data":b64encode(cypher.encrypt(pad(bytes(json.dumps(data),'utf-8'),16))).decode('utf-8')}
+
+        url = "https://einv-gsp-sandbox.internal.cleartax.co/eiewb/v1.03/ewaybill"
+        response = requests.post(url, headers=header, json=payload)
+        response_code = response.status_code
+        if response_code == 200:
+            response_json = response.json()
+            print('\n\nEWB Response\n',response_json)
+        #     if response_json.get('Status'):
+        #         response_data = json.loads(unpad(cypher.decrypt(b64decode(response_json.get('Data'))),16).decode('utf-8'))
+        #         return {
+        #             'Success': True,
+        #             'Error': '',
+        #             'GovResponse': response_data
+        #         }
+        #     else:
+        #         response_data = response_json
+        #         return {
+        #             'Success': False,
+        #             'Error': 'Invoice Error',
+        #             'GovResponse': response_data
+        #         }
+        # else:
+        #     return {
+        #         'Success': False,
+        #         'Error': 'Unable to connet to Govt Server',
+        #         'GovResponse': {}
+        #     }
+
+    def get_ewb(self,request_json):
+        try:
+            new_rec = self.create({})
+            header = new_rec._get_session(request_json.get('auth'))
+        except:
+            return  {
+                'Success': False,
+                'Error': 'Authentication Failed',
+                'GovResponse': {}
+            }
+        
+        if new_rec.session_id:
+            session_resp = new_rec.session_id._auth_session()
+            print('\n\nSession\n\n',new_rec.session_id)
+            if not session_resp.get('Success'):
+                print('\n\nReturn Session Response\n',session_resp)
+                return session_resp
+        else:
+            return  {
+                'Success': False,
+                'Error': 'Authentication Failed',
+                'GovResponse': {}
+            }
+        transaction_resp = new_rec._process_ewb_request(header,request_json.get('data'))
         print('\n\nIRN Response\n',transaction_resp)
         return transaction_resp
