@@ -212,7 +212,7 @@ class EinvoicingTransactionManager(models.Model):
         response_code = response.status_code
         if response_code == 200:
             response_json = response.json()
-            print('\n\nEWB Response\n',response_json)
+            _logger.info('\nEWB Response\n{}\nEWB Response\n'.format(response_json))
         #     if response_json.get('Status'):
         #         response_data = json.loads(unpad(cypher.decrypt(b64decode(response_json.get('Data'))),16).decode('utf-8'))
         #         return {
