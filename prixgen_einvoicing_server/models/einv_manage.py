@@ -205,7 +205,7 @@ class EinvoicingTransactionManager(models.Model):
     def _process_ewb_request(self,header,data):
         header.update({"AuthToken": self.session_id.auth_token})
         cypher = AES.new(b64decode(self.session_id.sek), AES.MODE_ECB)
-        payload = {"Data":b64encode(cypher.encrypt(pad(bytes(json.dumps(data),'utf-8'),16))).decode('utf-8')}
+        payload = {"Data":json.dumps(data)}
 
         url = "https://einv-gsp-sandbox.internal.cleartax.co/eiewb/v1.03/ewaybill"
         response = requests.post(url, headers=header, json=payload)
