@@ -49,7 +49,7 @@ class EinvoicingSessionManager(models.Model):
         encrypted_pass = b64encode(pub_key_encryption.encrypt(bytes(self.partner_id.einv_pass, 'utf-8')))
 
         headers = {
-            "X-CT-Auth-Token": "e23a24b1-1c3f-4a62-b11c-a1e4d6f5b3d6"
+            "X-CT-Auth-Token": "d07aa469-541c-449f-8d7e-629074ab5d64"
         }
 
         payload ={
@@ -137,7 +137,7 @@ class EinvoicingTransactionManager(models.Model):
         self.partner_id = self.env['res.partner'].sudo().search([('einv_txn_key','=',auth.get('txn_key'))])
         self.session_id = self.env['einvoicing.session.manager'].search([('partner_id','=',self.partner_id.id)])
         return {
-            "X-CT-Auth-Token": "e23a24b1-1c3f-4a62-b11c-a1e4d6f5b3d6",
+            "X-CT-Auth-Token": "d07aa469-541c-449f-8d7e-629074ab5d64",
             "user_name": self.partner_id.einv_user,
             "Gstin": self.partner_id.vat
         }
