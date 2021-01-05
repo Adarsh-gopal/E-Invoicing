@@ -209,6 +209,8 @@ class EinvoicingTransactionManager(models.Model):
 
         url = "https://einv-gsp-sandbox.internal.cleartax.co/eiewb/v1.03/ewaybill"
         response = requests.post(url, headers=header, json=payload)
+        _logger.info('\nEWBHeader\n{}\nEWBHeader\n'.format(header))
+        _logger.info('\nEWBPayload\n{}\nEWBPayload\n'.format(payload))
         response_code = response.status_code
         if response_code == 200:
             response_json = response.json()
